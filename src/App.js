@@ -1,5 +1,6 @@
 import "./App.css";
 import ResultPanel from "./components/ResultPanel";
+import Pagination from "./components/pagination/Pagination";
 import { kendra } from "./services/Kendra";
 import { useEffect, useState } from "react";
 
@@ -12,6 +13,8 @@ import {
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [queryText, setQueryText] = useState("ec2");
+
   // Results
   const [allResults, setItems] = useState([]);
   const [topResults, setTopResults] = useState([]);
@@ -19,19 +22,22 @@ function App() {
   const [docResults, setDocResults] = useState([]);
   const [dataReady, setDataReady] = useState(false);
   //Query Builder
-  const queryRequest = {
-    IndexId: "4bad54f4-e65f-4268-9748-5aed28ae83e9",
-    QueryText: "what is s3",
-    PageNumber: currentPage,
-  };
 
   // API to fetch Items
-  const fetchItems = async () => {
+  const getResultsHelper = async (queryText, pageNumber) => {
+    const queryRequest = {
+      IndexId: "4bad54f4-e65f-4268-9748-5aed28ae83e9",
+      QueryText: queryText,
+      PageNumber: pageNumber,
+    };
+
     let results;
     if (kendra === undefined) {
       console.error("ERROR kendra didnt UP");
     } else {
       try {
+        queryRequest.QueryText = queryText;
+        queryRequest.PageNumber = pageNumber;
         results = await kendra.query(queryRequest).promise();
       } catch (e) {
         // return;
@@ -68,18 +74,35 @@ function App() {
     }
   };
 
+  const getResultsOnPageChanging = async (queryText, pageNumber) => {
+    computeFilterAndReSubmitQuery(queryText, pageNumber);
+  };
+
+  const computeFilterAndReSubmitQuery = (queryText, pageNumber) => {
+    // const filter = this.state.selectedFacets.buildAttributeFilter(
+    //   this.state.attributeTypeLookup
+    // );
+    getResultsHelper(queryText, pageNumber);
+  };
+
   useEffect(() => {
     // fetchItems();
   });
 
   return (
     <div>
-      <button onClick={() => fetchItems()}>Hello</button>
+      <button onClick={() => getResultsHelper("ec2", 1)}>Hello</button>
       <ResultPanel
         results={allResults}
         topResults={topResults}
         faqResults={faqResults}
         docResults={docResults}
+      />
+      <Pagination
+        queryText={queryText}
+        currentPageNumber={currentPage}
+        onSubmit={() => getResultsOnPageChanging(queryText, currentPage)}
+        results={allResults}
       />
     </div>
   );
