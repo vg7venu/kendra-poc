@@ -21,6 +21,7 @@ function App() {
   const [faqResults, setFAQResults] = useState([]);
   const [docResults, setDocResults] = useState([]);
   const [dataReady, setDataReady] = useState(false);
+  const [isplageLoaded, setIspageLoaded] = useState(false);
   //Query Builder
 
   // API to fetch Items
@@ -67,6 +68,10 @@ function App() {
       setFAQResults(tempFAQResults);
       setDocResults(tempDocumentResults);
       setItems(results);
+      setCurrentPage(pageNumber);
+      if (!isplageLoaded) {
+        setIspageLoaded(true);
+      }
       // console.log("docum" + JSON.stringify(tempDocumentResults));
       // console.log("faq" + JSON.stringify(tempFAQResults));
       // console.log("top" + JSON.stringify(tempTopResults));
@@ -98,12 +103,14 @@ function App() {
         faqResults={faqResults}
         docResults={docResults}
       />
-      <Pagination
-        queryText={queryText}
-        currentPageNumber={currentPage}
-        onSubmit={() => getResultsOnPageChanging(queryText, currentPage)}
-        results={allResults}
-      />
+      {isplageLoaded && (
+        <Pagination
+          queryText={queryText}
+          currentPageNumber={currentPage}
+          onSubmit={getResultsOnPageChanging}
+          results={allResults}
+        />
+      )}
     </div>
   );
 }
